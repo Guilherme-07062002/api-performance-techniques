@@ -4,7 +4,8 @@ import { Job } from 'bull';
 
 @Processor('audio-processor-queue')
 export class AudioProcessorQueue {
-  @Process()
+  
+  @Process('process-audio')
   async handleJob(job: any) {
       console.log('Processing job...');
       await fetch('https://httpbin.org/delay/10');
