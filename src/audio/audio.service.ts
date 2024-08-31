@@ -1,15 +1,9 @@
-// import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
-// import { Queue } from 'bull';
 import { Worker } from 'worker_threads';
 import * as path from 'path';
 
 @Injectable()
 export class AudioService {
-    // constructor(
-    //     @InjectQueue('audio-processor-queue') private audioQueue: Queue
-    // ){}
-
     async processAudio() {
         // Caminho para o script que será executado na thread secundária
         const scriptPath = path.join(__dirname, '../audio/audio.worker.js');
