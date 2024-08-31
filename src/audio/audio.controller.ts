@@ -9,6 +9,6 @@ export class AudioController {
     async addJob() {
         await this.audioService.processAudio();
 
-        return { message: 'Seu áudio foi enviado para a fila de processamento' };
+        return { message: 'Seu áudio foi processado com sucesso!' };
     }
 }
