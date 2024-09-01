@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Worker } from 'worker_threads';
 import * as path from 'path';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AudioService {
+    constructor(private readonly eventEmitter: EventEmitter2) {}
+
     async processAudio() {
         const scriptPath = path.resolve(__dirname, '../audio/audio.worker.js');
 
@@ -11,13 +14,14 @@ export class AudioService {
             workerData: { data: 'processing audio' },
         });
 
-        worker.on('message', this.handleWorkerMessage);
-        worker.on('error', this.handleWorkerError);
-        worker.on('exit', this.handleWorkerExit);
+        worker.on('message', this.handleWorkerMessage.bind(this));
+        worker.on('error', this.handleWorkerError.bind(this));
+        worker.on('exit', this.handleWorkerExit.bind(this));
     }
 
     private handleWorkerMessage(message: any) {
         console.log('Received from worker:', message);
+        this.eventEmitter.emit('audio.processed', message);
     }
 
     private handleWorkerError(error: Error) {
