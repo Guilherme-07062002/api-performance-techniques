@@ -11,9 +11,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    EventEmitterModule.forRoot({
-      // Opções de configuração, se necessário
-    }),
+    EventEmitterModule.forRoot(),
     AudioModule
   ],
   controllers: [AppController],

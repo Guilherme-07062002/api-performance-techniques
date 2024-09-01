@@ -7,21 +7,21 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class AudioService {
     constructor(private readonly eventEmitter: EventEmitter2) {}
 
-    async processAudio() {
+    async processAudio(clientId: string) {
         const scriptPath = path.resolve(__dirname, '../audio/audio.worker.js');
 
         const worker = new Worker(scriptPath, {
-            workerData: { data: 'processing audio' },
+            workerData: { data: 'processing audio', clientId },
         });
 
-        worker.on('message', this.handleWorkerMessage.bind(this));
-        worker.on('error', this.handleWorkerError.bind(this));
-        worker.on('exit', this.handleWorkerExit.bind(this));
+        worker.on('message', (message) => this.handleWorkerMessage(message, clientId));
+        worker.on('error', this.handleWorkerError);
+        worker.on('exit', this.handleWorkerExit);
     }
 
-    private handleWorkerMessage(message: any) {
+    private handleWorkerMessage(message: any, clientId: string) {
         console.log('Received from worker:', message);
-        this.eventEmitter.emit('audio.processed', message);
+        this.eventEmitter.emit('audio.processed', { clientId, message });
     }
 
     private handleWorkerError(error: Error) {

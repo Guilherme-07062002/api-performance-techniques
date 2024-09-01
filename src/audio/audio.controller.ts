@@ -1,40 +1,44 @@
-import { Controller, Get, Post, Res, Sse } from '@nestjs/common';
+import { Controller, Get, Post, Res, Sse, Req, Query } from '@nestjs/common';
 import { AudioService } from './audio.service';
-import { fromEvent, map, Observable } from 'rxjs';
+import { Response, Request } from 'express';
+import { Observable, Subject } from 'rxjs';
 import { join } from 'path';
-import { Response } from 'express';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Controller('audio')
 export class AudioController {
-    constructor(
-        private readonly audioService: AudioService,
-        private readonly eventEmitter: EventEmitter2
-    ) {}
+    private readonly clients = new Map<string, Subject<MessageEvent>>();
+
+    constructor(private readonly audioService: AudioService) {}
 
     @Get('view')
     renderAudioPlayer(@Res() res: Response) {
-        const filePath = join(__dirname, '..', 'public', 'index.html');
-        res.sendFile(filePath);
+        res.sendFile(join(__dirname, '..', 'public', 'index.html'));
     }
 
     @Post('process')
-    async addJob() {
-        console.log('Received job to process audio');
-        await this.audioService.processAudio();
+    async addJob(@Query('clientId') clientId: string) {
+        await this.audioService.processAudio(clientId);
+
         return { message: 'Áudio em processamento' };
     }
 
     @Sse('sse')
-    sse(): Observable<MessageEvent> {
-        return fromEvent(this.eventEmitter, 'audio.processed').pipe(
-            map((data: any) => {
-                return new MessageEvent('message', { data });
-            }),
-        );
+    sse(@Req() req: Request, @Query('clientId') clientId: string): Observable<MessageEvent> {
+        console.log('Client connected:', clientId);
+        const subject = new Subject<MessageEvent>();
+        if (clientId) this.clients.set(clientId, subject);
+
+        req.on('close', () => this.clients.delete(clientId));        
+        return subject.asObservable();
     }
 
-    emitEvent(data: any) {
-        this.eventEmitter.emit('audio.processed', data);
+    @OnEvent('audio.processed')
+    emitEvent(payload: { clientId: string; message: string }) {
+        const messageEvent = new MessageEvent('message', payload.message as MessageEventInit<unknown>);
+        const subject = this.clients.get(payload.clientId);
+
+        console.log('Emitting event to client:', payload.clientId);
+        if (subject) subject.next(messageEvent);
     }
 }

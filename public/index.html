@@ -32,7 +32,8 @@
     </div>
 
     <script>
-        const eventSource = new EventSource('http://localhost:3000/audio/sse');
+        const uniqueId = Date.now();
+        const eventSource = new EventSource('http://localhost:3000/audio/sse?clientId=' + uniqueId);
         const messagesDiv = document.getElementById('messages');
 
         eventSource.onmessage = function(event) {
