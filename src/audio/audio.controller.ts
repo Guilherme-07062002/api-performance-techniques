@@ -29,7 +29,10 @@ export class AudioController {
         const subject = new Subject<MessageEvent>();
         if (clientId) this.clients.set(clientId, subject);
 
-        req.on('close', () => this.clients.delete(clientId));        
+        req.on('close', () => {
+            console.log('Client disconnected:', clientId);
+            this.clients.delete(clientId)
+    });        
         return subject.asObservable();
     }
 
