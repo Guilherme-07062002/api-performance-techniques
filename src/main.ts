@@ -1,8 +1,20 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { spawn } from 'child_process';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
-}
-bootstrap();
+// Inicia o servidor Express
+const expressServer = spawn('ts-node', ['src/express/main.ts'], {
+  stdio: 'inherit',
+  shell: true,
+});
+
+// Inicia o servidor Fastify
+const fastifyServer = spawn('ts-node', ['src/fastify/main.ts'], {
+  stdio: 'inherit',
+  shell: true,
+});
+
+// Manipula o fechamento dos servidores
+process.on('SIGINT', () => {
+  expressServer.kill();
+  fastifyServer.kill();
+  process.exit();
+});
