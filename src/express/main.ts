@@ -1,16 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import { ExpressModule } from './express.module';
-import * as express from 'express';
+import { DynamicModule } from '../dynamic.module';
 
 async function bootstrap() {
-  const server = express();
   const app = await NestFactory.create(
-    ExpressModule,
-    new ExpressAdapter(server),
+    DynamicModule.register(3000),
+    new ExpressAdapter(),
   );
-  await app.listen(3000);
-  console.log('Express server listening on port 3000');
+  await app.listen(3000, () => {
+    console.log(`Express rodando na porta 3000`);
+  });
 }
 
 bootstrap();
