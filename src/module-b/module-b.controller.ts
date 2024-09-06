@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class ModuleBController {
-  @Get()
+  @Get('fastify')
   getHello(): { message: string } {
     return { message: 'Fastify says hello!' };
   }

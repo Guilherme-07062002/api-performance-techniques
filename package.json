@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "concurrently \"nest start --watch\" \"npm run start:all\"",
     "start:a": "ts-node src/module-a/module-a.main.ts",
     "start:b": "ts-node src/module-b/module-b.main.ts",
     "start:all": "concurrently --names \"Express,Fastify\" -c \"green,blue\" \"npm run start:a\" \"npm run start:b\"",
@@ -27,6 +27,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-fastify": "^10.4.1",
+    "http-proxy-middleware": "^3.0.2",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
   },
